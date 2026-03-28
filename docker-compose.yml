@@ -5,8 +5,7 @@ services:
     build: ./asl
     container_name: allstar-asl
     network_mode: host
-    devices:
-      - /dev/dahdi:/dev/dahdi
+    privileged: true
     volumes:
       - ./asl/conf:/etc/asterisk-templates:ro
       - asl-etc:/etc/asterisk
