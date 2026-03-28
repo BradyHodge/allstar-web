@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  asl:
+    build: ./asl
+    container_name: allstar-asl
+    network_mode: host
+    devices:
+      - /dev/dahdi:/dev/dahdi
+    volumes:
+      - ./asl/conf:/etc/asterisk-templates:ro
+      - asl-etc:/etc/asterisk
+      - asl-spool:/var/spool/asterisk
+      - asl-log:/var/log/asterisk
+    environment:
+      - NODE_NUMBER=${NODE_NUMBER}
+      - NODE_PASSWORD=${NODE_PASSWORD}
+      - SIP_PASSWORD=${SIP_PASSWORD:-changeme-sip}
+      - AMI_SECRET=${AMI_SECRET:-changeme-ami}
+      - STUN_SERVER=${STUN_SERVER:-stun.l.google.com:19302}
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    container_name: allstar-api
+    networks:
+      - internal
+    environment:
+      - NODE_NUMBER=${NODE_NUMBER}
+      - AMI_HOST=host.docker.internal
+      - AMI_PORT=5038
+      - AMI_USER=webtx
+      - AMI_SECRET=${AMI_SECRET:-changeme-ami}
+      - SIP_DOMAIN=${DOMAIN}
+      - SIP_USER=webtx
+      - SIP_PASSWORD=${SIP_PASSWORD:-changeme-sip}
+      - STUN_SERVER=${STUN_SERVER:-stun.l.google.com:19302}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - asl
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: allstar-caddy
+    networks:
+      - internal
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      - DOMAIN=${DOMAIN}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  asl-etc:
+  asl-spool:
+  asl-log:
+  caddy-data:
+  caddy-config:

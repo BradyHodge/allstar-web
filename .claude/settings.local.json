@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:allstarlink.github.io)",
+      "WebFetch(domain:pkg.allstarlink.org)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:jssip.net)"
+    ]
+  }
+}

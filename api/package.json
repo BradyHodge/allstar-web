@@ -1,0 +1,14 @@
+{
+  "name": "allstar-web-api",
+  "version": "1.0.0",
+  "description": "AllStar Web Transceiver - API and web UI server",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "asterisk-manager": "^0.1.14",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0"
+  }
+}

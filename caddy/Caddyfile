@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────
+#  Caddy reverse proxy for AllStar Web Transceiver
+#  DOMAIN is set via the environment variable in docker-compose.
+#
+#  Caddy auto-provisions a Let's Encrypt TLS cert for your domain.
+#  Port 80 and 443 must be reachable from the internet.
+#
+#  Routes:
+#    /ws   → Asterisk PJSIP WebSocket (host:8088)
+#            Caddy terminates WSS; Asterisk receives plain WS.
+#    /*    → Node.js API + web UI (api:3000)
+# ─────────────────────────────────────────────────────────
+
+{$DOMAIN} {
+
+    # ── WebSocket for WebRTC SIP (JsSIP ↔ Asterisk PJSIP) ──
+    # Must be proxied to the host-networked ASL container.
+    # host.docker.internal resolves to the Docker host IP via extra_hosts.
+    handle /ws {
+        reverse_proxy host.docker.internal:8088 {
+            # Disable buffering - WebSocket needs streaming
+            flush_interval -1
+            header_up Host        {host}
+            header_up X-Real-IP   {remote_host}
+            header_up X-Forwarded-Proto https
+        }
+    }
+
+    # ── Web UI + API ────────────────────────────────────────
+    handle {
+        reverse_proxy api:3000 {
+            flush_interval -1
+        }
+    }
+
+    # Gzip for static assets
+    encode gzip
+
+    # Request logging
+    log {
+        output stdout
+        level  INFO
+    }
+}
