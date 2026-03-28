@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # AllStar Web Transceiver - Asterisk entrypoint
-# Copies config templates from the read-only bind mount, injects
-# environment variables, then starts Asterisk in the foreground.
+# Copies config templates, injects env vars, starts Asterisk.
+# Per-user node configs are written by the API container into
+# the shared 'asterisk-users' volume at /etc/asterisk/users/.
 set -euo pipefail
 
 echo "==================================================="
-echo "  AllStar Web Transceiver - Node ${NODE_NUMBER}"
+echo "  AllStar Web Transceiver - Multi-User Node Server"
 echo "==================================================="
 
-# ── Copy templates to the writable volume ──────────────
-# /etc/asterisk-templates is a read-only bind mount from ./asl/conf/
-# /etc/asterisk is a named volume (writable)
+# ── Copy templates to writable /etc/asterisk ───────────
+# Copies only top-level files (excludes the dahdi/ subdir which is handled below)
 echo "Copying config templates..."
-# Copy Asterisk configs (exclude the dahdi subdir)
-find /etc/asterisk-templates -maxdepth 1 -not -path /etc/asterisk-templates -exec cp -af {} /etc/asterisk/ \;
+find /etc/asterisk-templates -maxdepth 1 -not -path /etc/asterisk-templates \
+    -exec cp -af {} /etc/asterisk/ \;
 
 # Copy DAHDI system.conf to the correct location
 if [ -f /etc/asterisk-templates/dahdi/system.conf ]; then
@@ -21,21 +21,12 @@ if [ -f /etc/asterisk-templates/dahdi/system.conf ]; then
     cp /etc/asterisk-templates/dahdi/system.conf /etc/dahdi/system.conf
 fi
 
-# ── Inject environment variables ───────────────────────
-# Only substitute the variables we control. Using an explicit variable
-# list prevents accidental substitution of Asterisk dialplan variables
-# like ${EXTEN} or ${CALLERID(number)}.
-VARS='${NODE_NUMBER} ${NODE_PASSWORD} ${SIP_PASSWORD} ${AMI_SECRET} ${STUN_SERVER}'
+# ── Inject environment variables ────────────────────────
+# Only AMI_SECRET and STUN_SERVER are needed in the static configs now.
+# NODE_NUMBER/NODE_PASSWORD are handled per-user by the API container.
+VARS='${AMI_SECRET} ${STUN_SERVER}'
 
-for f in \
-    rpt.conf \
-    iax.conf \
-    pjsip.conf \
-    extensions.conf \
-    manager.conf \
-    rtp.conf \
-    rpt_http_registrations.conf; do
-
+for f in manager.conf rtp.conf; do
     TARGET="/etc/asterisk/${f}"
     if [ -f "${TARGET}" ]; then
         envsubst "${VARS}" < "${TARGET}" > "${TARGET}.tmp"
@@ -43,9 +34,13 @@ for f in \
     fi
 done
 
-chown -R asterisk:asterisk /etc/asterisk
+# ── Ensure users directory exists (shared volume) ───────
+# The API container writes user configs here; Asterisk reads them.
+# #tryinclude in configs gracefully handles the files not existing yet.
+mkdir -p /etc/asterisk/users
+chown -R asterisk:asterisk /etc/asterisk /etc/asterisk/users 2>/dev/null || true
 
-# ── DAHDI ──────────────────────────────────────────────
+# ── DAHDI ───────────────────────────────────────────────
 if [ -c "/dev/dahdi/ctl" ]; then
     echo "DAHDI device found. Running dahdi_cfg..."
     dahdi_cfg -vv 2>/dev/null || true
@@ -54,11 +49,8 @@ else
     echo "WARNING: /dev/dahdi not found!"
     echo "  Run ./host-setup.sh on the VPS host to install DAHDI,"
     echo "  then restart this container."
-    echo "  Continuing anyway - Asterisk will start but the AllStar"
-    echo "  node channel (DAHDI/pseudo) will not be available."
     echo ""
 fi
 
-# ── Start Asterisk ─────────────────────────────────────
-echo "Starting Asterisk (node ${NODE_NUMBER})..."
+echo "Starting Asterisk..."
 exec asterisk -f -p -U asterisk -G asterisk

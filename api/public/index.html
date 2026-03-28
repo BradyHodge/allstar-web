@@ -18,8 +18,6 @@
       --red:      #f85149;
       --amber:    #d29922;
       --blue:     #58a6ff;
-      --ptt-idle: #21262d;
-      --ptt-tx:   #b91c1c;
       --radius:   8px;
     }
 
@@ -32,20 +30,128 @@
       flex-direction: column;
     }
 
-    /* ── Header ── */
+    /* ═══════════════════════════════════════════
+       SETUP SCREEN
+    ═══════════════════════════════════════════ */
+    #setup-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .setup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .setup-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .setup-logo h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .setup-logo p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-group input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 1rem;
+      font-family: monospace;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    .form-group input::placeholder { color: var(--muted); }
+
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    #setup-error {
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid var(--red);
+      border-radius: var(--radius);
+      color: var(--red);
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    #btn-setup {
+      width: 100%;
+      padding: 12px;
+      background: var(--blue);
+      color: #0d1117;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 8px;
+    }
+    #btn-setup:hover:not(:disabled) { opacity: 0.85; }
+    #btn-setup:disabled { opacity: 0.5; cursor: default; }
+
+    .setup-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .setup-footer a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    /* ═══════════════════════════════════════════
+       TRANSCEIVER SCREEN
+    ═══════════════════════════════════════════ */
+    #transceiver-screen { display: none; flex: 1; flex-direction: column; }
+
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 12px 20px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
-    header h1 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
+    header h1 { font-size: 1rem; font-weight: 600; }
     .node-badge {
       font-family: monospace;
       font-size: 0.85rem;
@@ -57,37 +163,39 @@
     }
     .spacer { flex: 1; }
     .status-dot {
-      width: 10px; height: 10px;
+      width: 9px; height: 9px;
       border-radius: 50%;
       background: var(--muted);
+      flex-shrink: 0;
       transition: background 0.3s;
     }
     .status-dot.registered  { background: var(--green); }
     .status-dot.connected   { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
     .status-dot.error       { background: var(--red); }
-    #status-text {
-      font-size: 0.8rem;
+    #status-text { font-size: 0.8rem; color: var(--muted); }
+    #btn-signout {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
       color: var(--muted);
+      cursor: pointer;
     }
+    #btn-signout:hover { border-color: var(--red); color: var(--red); }
 
-    /* ── Main layout ── */
     main {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 320px;
-      grid-template-rows: auto;
+      grid-template-columns: 1fr 300px;
       gap: 16px;
       padding: 16px;
-      max-width: 960px;
+      max-width: 900px;
       margin: 0 auto;
       width: 100%;
     }
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } }
 
-    @media (max-width: 680px) {
-      main { grid-template-columns: 1fr; }
-    }
-
-    /* ── Panel ── */
     .panel {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -95,26 +203,20 @@
       padding: 20px;
     }
     .panel-title {
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.7rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--muted);
       margin-bottom: 16px;
     }
 
-    /* ── PTT section ── */
-    .ptt-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
+    /* PTT section */
+    .ptt-section { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 
-    /* Big connect/disconnect audio button */
     #btn-audio {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
       background: #21262d;
@@ -128,230 +230,208 @@
     #btn-audio.connected { border-color: var(--blue); color: var(--blue); }
     #btn-audio:disabled  { opacity: 0.4; cursor: default; }
 
-    /* PTT button */
     #btn-ptt {
-      width: 180px;
-      height: 180px;
+      width: 170px; height: 170px;
       border-radius: 50%;
       border: 3px solid var(--border);
-      background: var(--ptt-idle);
+      background: #21262d;
       color: var(--muted);
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
       transition: background 0.1s, border-color 0.1s, color 0.1s, box-shadow 0.1s;
     }
-    #btn-ptt:disabled {
-      opacity: 0.3;
-      cursor: default;
-    }
+    #btn-ptt:disabled { opacity: 0.3; cursor: default; }
     #btn-ptt.transmitting {
-      background: var(--ptt-tx);
-      border-color: #ef4444;
-      color: #fff;
-      box-shadow: 0 0 24px rgba(239, 68, 68, 0.5);
+      background: #7f1d1d;
+      border-color: var(--red);
+      color: #fca5a5;
+      box-shadow: 0 0 32px rgba(239, 68, 68, 0.4);
     }
-
     #ptt-label {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--muted);
-      min-height: 1.2em;
       text-align: center;
+      min-height: 1.2em;
     }
     #ptt-label.tx { color: var(--red); font-weight: 600; }
 
-    /* Volume meter */
-    .meter-wrap {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .meter-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-    }
-    .meter-bar {
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .meter-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--green);
-      border-radius: 3px;
-      transition: width 0.05s;
-    }
+    /* Meters */
+    .meter-wrap { width: 100%; display: flex; flex-direction: column; gap: 3px; }
+    .meter-label { font-size: 0.68rem; color: var(--muted); display: flex; justify-content: space-between; }
+    .meter-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .meter-fill { height: 100%; width: 0%; background: var(--green); border-radius: 3px; transition: width 0.04s; }
     #rx-fill { background: var(--blue); }
 
-    /* ── Side panel ── */
-    .side-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    /* Side panel */
+    .side-panel { display: flex; flex-direction: column; gap: 16px; }
 
-    /* Node connect form */
-    .form-row {
-      display: flex;
-      gap: 8px;
-    }
-    input[type="text"] {
+    .form-row { display: flex; gap: 8px; }
+    .side-input {
       flex: 1;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       color: var(--text);
-      padding: 8px 12px;
+      padding: 8px 10px;
       font-size: 0.9rem;
       font-family: monospace;
     }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--blue);
-    }
-    input[type="text"]::placeholder { color: var(--muted); }
+    .side-input:focus { outline: none; border-color: var(--blue); }
+    .side-input::placeholder { color: var(--muted); }
 
     .btn {
-      padding: 8px 14px;
+      padding: 8px 12px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
       background: #21262d;
       color: var(--text);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
       white-space: nowrap;
+      transition: background 0.1s;
     }
     .btn:hover:not(:disabled) { background: #2d333b; }
     .btn:disabled { opacity: 0.4; cursor: default; }
-    .btn-connect { border-color: var(--green); color: var(--green); }
-    .btn-connect:hover:not(:disabled) { background: rgba(63, 185, 80, 0.1); }
-    .btn-disconnect { border-color: var(--red); color: var(--red); }
-    .btn-disconnect:hover:not(:disabled) { background: rgba(248, 81, 73, 0.1); }
+    .btn-green { border-color: var(--green); color: var(--green); }
+    .btn-green:hover:not(:disabled) { background: rgba(63,185,80,0.1); }
+    .btn-red { border-color: var(--red); color: var(--red); }
+    .btn-red:hover:not(:disabled) { background: rgba(248,81,73,0.1); }
 
-    /* Linked nodes list */
-    #linked-nodes {
-      font-size: 0.8rem;
-      color: var(--muted);
-      min-height: 48px;
-    }
+    /* Linked nodes */
+    #linked-nodes { font-size: 0.8rem; color: var(--muted); min-height: 40px; }
     .node-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 8px;
-      background: var(--bg);
-      border-radius: 4px;
-      margin-bottom: 4px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 8px; background: var(--bg); border-radius: 4px; margin-bottom: 4px;
       font-family: monospace;
     }
-    .node-item .node-number { color: var(--blue); }
-    .node-item .btn-unlink {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      color: var(--muted);
-      cursor: pointer;
+    .node-num { color: var(--blue); }
+    .btn-unlink-item {
+      font-size: 0.68rem; padding: 2px 6px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 3px; color: var(--muted); cursor: pointer;
     }
-    .node-item .btn-unlink:hover { border-color: var(--red); color: var(--red); }
+    .btn-unlink-item:hover { border-color: var(--red); color: var(--red); }
 
-    /* Log */
+    /* Activity log */
     #log {
-      font-family: monospace;
-      font-size: 0.72rem;
-      color: var(--muted);
-      max-height: 180px;
-      overflow-y: auto;
-      line-height: 1.6;
-      word-break: break-word;
+      font-family: monospace; font-size: 0.7rem;
+      color: var(--muted); max-height: 160px;
+      overflow-y: auto; line-height: 1.7;
     }
-    #log .entry { border-bottom: 1px solid #21262d; padding: 2px 0; }
+    #log .entry { border-bottom: 1px solid #21262d; padding: 1px 0; }
     #log .entry.warn  { color: var(--amber); }
     #log .entry.error { color: var(--red); }
     #log .entry.ok    { color: var(--green); }
 
-    /* Hidden audio element for remote audio playback */
     audio { display: none; }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>AllStar Web Transceiver</h1>
-  <span class="node-badge" id="node-badge">Node —</span>
-  <span class="spacer"></span>
-  <div class="status-dot" id="status-dot"></div>
-  <span id="status-text">Initialising…</span>
-</header>
-
-<main>
-  <!-- Left: PTT Panel -->
-  <div class="panel ptt-section">
-    <div class="panel-title">Transceiver</div>
-
-    <button id="btn-audio" disabled>Connect Audio</button>
-
-    <button id="btn-ptt" disabled>PTT</button>
-    <div id="ptt-label">Connect audio to enable</div>
-
-    <div class="meter-wrap">
-      <div class="meter-label"><span>TX (mic)</span><span id="tx-db">—</span></div>
-      <div class="meter-bar"><div class="meter-fill" id="tx-fill"></div></div>
+<!-- ═══════════════════════════════════════════ -->
+<!--  SETUP SCREEN                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <h1>AllStar Web Transceiver</h1>
+      <p>Enter your AllStar node credentials to begin</p>
     </div>
-    <div class="meter-wrap">
-      <div class="meter-label"><span>RX (node)</span><span id="rx-db">—</span></div>
-      <div class="meter-bar"><div class="meter-fill" id="rx-fill"></div></div>
+
+    <div id="setup-error"></div>
+
+    <div class="form-group">
+      <label>Node Number</label>
+      <input type="text" id="setup-node" placeholder="e.g. 50123"
+             inputmode="numeric" maxlength="7" autocomplete="off">
+      <div class="form-hint">Your node number from allstarlink.org</div>
+    </div>
+
+    <div class="form-group">
+      <label>Node Password</label>
+      <input type="password" id="setup-pass" placeholder="IAX password"
+             autocomplete="current-password">
+      <div class="form-hint">The IAX password from your allstarlink.org account</div>
+    </div>
+
+    <button id="btn-setup">Connect</button>
+
+    <div class="setup-footer">
+      Don't have a node?
+      <a href="https://www.allstarlink.org/portal/" target="_blank" rel="noopener">
+        Register at allstarlink.org
+      </a>
     </div>
   </div>
+</div>
 
-  <!-- Right: Controls + Log -->
-  <div class="side-panel">
+<!-- ═══════════════════════════════════════════ -->
+<!--  TRANSCEIVER SCREEN                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="transceiver-screen">
+  <header>
+    <h1>AllStar Web Transceiver</h1>
+    <span class="node-badge" id="node-badge">—</span>
+    <span class="spacer"></span>
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Initialising…</span>
+    <button id="btn-signout">Sign out</button>
+  </header>
 
-    <!-- Node connect -->
-    <div class="panel">
-      <div class="panel-title">Link Node</div>
-      <div class="form-row">
-        <input type="text" id="target-node" placeholder="Node number…" maxlength="7" inputmode="numeric">
-        <button class="btn btn-connect" id="btn-link">Link</button>
-        <button class="btn btn-disconnect" id="btn-unlink">Unlink</button>
+  <main>
+    <!-- Left: PTT -->
+    <div class="panel ptt-section">
+      <div class="panel-title">Transceiver</div>
+
+      <button id="btn-audio" disabled>Connect Audio</button>
+
+      <button id="btn-ptt" disabled>PTT</button>
+      <div id="ptt-label">Connect audio to enable</div>
+
+      <div class="meter-wrap">
+        <div class="meter-label"><span>TX (mic)</span><span id="tx-db">—</span></div>
+        <div class="meter-bar"><div class="meter-fill" id="tx-fill"></div></div>
       </div>
-      <div style="margin-top:10px;">
-        <button class="btn btn-disconnect" id="btn-unlink-all" style="font-size:0.75rem;padding:5px 10px;">
-          Unlink All
-        </button>
-        <button class="btn" id="btn-refresh-status" style="font-size:0.75rem;padding:5px 10px;margin-left:6px;">
-          Refresh Status
-        </button>
-      </div>
-
-      <div style="margin-top:14px;">
-        <div class="panel-title" style="margin-bottom:8px;">Linked Nodes</div>
-        <div id="linked-nodes">No links active</div>
+      <div class="meter-wrap">
+        <div class="meter-label"><span>RX (node)</span><span id="rx-db">—</span></div>
+        <div class="meter-bar"><div class="meter-fill" id="rx-fill"></div></div>
       </div>
     </div>
 
-    <!-- Log -->
-    <div class="panel" style="flex:1">
-      <div class="panel-title">Activity Log</div>
-      <div id="log"></div>
+    <!-- Right: Controls + Log -->
+    <div class="side-panel">
+      <div class="panel">
+        <div class="panel-title">Link Node</div>
+        <div class="form-row">
+          <input type="text" class="side-input" id="target-node"
+                 placeholder="Node number…" maxlength="7" inputmode="numeric">
+          <button class="btn btn-green" id="btn-link">Link</button>
+          <button class="btn btn-red"   id="btn-unlink">Unlink</button>
+        </div>
+        <div style="margin-top:10px; display:flex; gap:6px;">
+          <button class="btn btn-red"   id="btn-unlink-all"   style="font-size:0.72rem;padding:5px 9px;">Unlink All</button>
+          <button class="btn"           id="btn-refresh"      style="font-size:0.72rem;padding:5px 9px;">↻ Refresh</button>
+        </div>
+        <div style="margin-top:14px;">
+          <div class="panel-title" style="margin-bottom:8px;">Active Links</div>
+          <div id="linked-nodes">No active links</div>
+        </div>
+      </div>
+
+      <div class="panel" style="flex:1;">
+        <div class="panel-title">Activity Log</div>
+        <div id="log"></div>
+      </div>
     </div>
+  </main>
+</div>
 
-  </div>
-</main>
-
-<!-- Hidden audio for incoming node audio -->
 <audio id="remote-audio" autoplay></audio>
 
 <script src="app.js"></script>

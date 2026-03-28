@@ -10,12 +10,11 @@ services:
     volumes:
       - ./asl/conf:/etc/asterisk-templates:ro
       - asl-etc:/etc/asterisk
+      # Shared volume: API writes user configs here, Asterisk reads them
+      - asterisk-users:/etc/asterisk/users
       - asl-spool:/var/spool/asterisk
       - asl-log:/var/log/asterisk
     environment:
-      - NODE_NUMBER=${NODE_NUMBER}
-      - NODE_PASSWORD=${NODE_PASSWORD}
-      - SIP_PASSWORD=${SIP_PASSWORD:-changeme-sip}
       - AMI_SECRET=${AMI_SECRET:-changeme-ami}
       - STUN_SERVER=${STUN_SERVER:-stun.l.google.com:19302}
     restart: unless-stopped
@@ -26,15 +25,20 @@ services:
     networks:
       - internal
     environment:
-      - NODE_NUMBER=${NODE_NUMBER}
       - AMI_HOST=host.docker.internal
       - AMI_PORT=5038
       - AMI_USER=webtx
       - AMI_SECRET=${AMI_SECRET:-changeme-ami}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-changeme-must-be-32-chars-exactly}
       - SIP_DOMAIN=${DOMAIN}
-      - SIP_USER=webtx
-      - SIP_PASSWORD=${SIP_PASSWORD:-changeme-sip}
       - STUN_SERVER=${STUN_SERVER:-stun.l.google.com:19302}
+      - ASTERISK_USERS_DIR=/etc/asterisk-users
+      - DB_PATH=/app/data/users.db
+    volumes:
+      # Same shared volume: API writes here
+      - asterisk-users:/etc/asterisk-users
+      # SQLite database persistence
+      - api-db:/app/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -67,7 +71,9 @@ networks:
 
 volumes:
   asl-etc:
+  asterisk-users:   # shared between asl and api
   asl-spool:
   asl-log:
+  api-db:
   caddy-data:
   caddy-config:

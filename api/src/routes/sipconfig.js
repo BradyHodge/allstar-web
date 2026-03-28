@@ -2,19 +2,22 @@
 
 const express = require('express');
 const router  = express.Router();
+const { requireAuth } = require('../middleware/auth');
 
 /**
  * GET /api/sip-config
- * Returns the SIP/WebRTC parameters the browser needs to connect.
- * Served over HTTPS via Caddy, so WSS URI is derived from DOMAIN env var.
+ * Returns the WebRTC/SIP parameters for the authenticated user's node.
+ * Each user gets their own SIP username (node_NNNNN) and password.
  */
-router.get('/', (req, res) => {
+router.get('/', requireAuth, (req, res) => {
   const domain = process.env.SIP_DOMAIN || req.hostname;
+  const { node_number, sip_password } = req.user;
+
   res.json({
     wsUri:       `wss://${domain}/ws`,
-    sipUri:      `sip:${process.env.SIP_USER || 'webtx'}@${domain}`,
-    password:    process.env.SIP_PASSWORD || '',
-    nodeNumber:  process.env.NODE_NUMBER  || '',
+    sipUri:      `sip:node_${node_number}@${domain}`,
+    password:    sip_password,
+    nodeNumber:  node_number,
     stunServers: [
       { urls: `stun:${process.env.STUN_SERVER || 'stun.l.google.com:19302'}` }
     ]
